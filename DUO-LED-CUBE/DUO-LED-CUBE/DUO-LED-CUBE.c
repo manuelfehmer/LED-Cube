@@ -4,11 +4,9 @@
  * Created: 08.06.2013 14:32:29
  *  Author: Manuel
  */ 
-
-
-#define Master 0
-#define Slave 1
 #include "main.h"
+
+
 //#include "uart.h"
 #include "font.h"
 #include "59116.h"
@@ -22,8 +20,7 @@ void Interrupt_init(void);
 ISR (TIMER0_COMP_vect);				
 
 //Variablen
-char CORE =Master; // Master or Slave Core
-//char CORE =Slave; // Master or Slave Core
+
 
 int main (void)
 {
@@ -46,19 +43,20 @@ int main (void)
 	
 	while(1)
 	{
-		
+		//set_cube(0xff);
 				
 		effect_blinky2(); //ok
+		effect_planboing(AXIS_Z,20); //ok
 		effect_planboing(AXIS_X,20); //ok
 		effect_planboing(AXIS_Y,20); //ok
 		effect_planboing(AXIS_Z,20); //ok
 		for (uint8_t ii=0;ii<8;ii++)
 			effect_box_shrink_grow (ii%4, ii & 4, 20); //ok
-		sendvoxels_rand_z(100,10,20); // ok
+		//sendvoxels_rand_z(100,10,20); // ok
 		effect_random_sparkle (3,20,10); //ok
 		effect_box_woopwoop(40,1); //naja
 		effect_rain(300); //ok
-		effect_wormsqueeze (2, AXIS_Z, 1, 100, 25); //ok
+		//effect_wormsqueeze (2, AXIS_Z, 1, 100, 25); //ok
 		for(int i=0;i<8;i++){			//	Pixel durchtesten
 			for(int j=0;j<64;j++)
 			{	LED[i][j/8][j%8]=0xff;
@@ -139,9 +137,49 @@ ISR(TIMER0_COMP_vect)				//Timer 0 Compare Interrupt startet hier
 {
 	TCCR0&=~3;						//Timer aus
 	TCNT0=0;						//Zählwert wieder auf 0
-	OCR0=100;						//Interrupt Comparewert wieder laden
-	I2C_Leds_ein(Ebene_ein%8);		//Säulentreiber einschalten für nächste Ebene
-	Ebene_ein++;					//nächste Ebene bearbeiten
+	OCR0=100;
+	if(CORE == Master){						//Interrupt Comparewert wieder laden
+		I2C_Leds_ein(Ebene_ein%8);		//Säulentreiber einschalten für nächste Ebene
+		Ebene_ein++;
+	}else{					//nächste Ebene bearbeiten
+		input_A ^= PINA;
+		count = 0;
+		switch(input_A){
+			case 0x01: 
+				count=0;
+				break;
+			case 0x02: 
+				count=1;
+				break;
+			case 0x04: 
+				count=2;
+				break;
+			case 0x08: 
+				count=3;
+				break;
+			case 0x10: 
+				count=4;
+				break;
+			case 0x20: 
+				count=5;
+				break;
+			case 0x40: 
+				count=6;
+				break;
+			case 0x80: 
+				count=7;
+				break;
+			defauld: 
+				count=0;
+				break;
+		}
+		//while(input_A!=1){
+			
+		//	input_A=(input_A>>1);
+		//	count++;
+		//}
+		I2C_Leds_ein(count);		//Säulentreiber einschalten für nächste Ebene
+	}			
 	TCCR0|=3;						//Timer ein
 }
 
@@ -153,7 +191,7 @@ void Interrupt_init(void)
 	TIMSK=(1<<OCIE0);				//Erlaubt Compare Interupt A
 	TCCR0=(1<<FOC0);				//Schaltet den Compare Modus ein 
 	TCCR0|=3;						//Prescaler 64
-	OCR0=98; 						//Comparewert-Initialisierung auf ca. 5 ms bis zum ersten Interupt
+	OCR0=800; 						//Comparewert-Initialisierung auf ca. 5 ms bis zum ersten Interupt
 	TCNT0=0;						//Timerwert auf 0 initialisieren
 //ENDE TIMER0
 }

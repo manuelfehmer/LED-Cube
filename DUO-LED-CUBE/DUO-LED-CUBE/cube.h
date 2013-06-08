@@ -37,6 +37,8 @@
 	volatile unsigned char LED[8][8][8];	//Ebene //Reihe //Spalte
 	volatile unsigned char LED_tmp[8][8][8];	//Ebene //Reihe //Spalte
 	volatile unsigned char Ebene_ein;
+	volatile unsigned char input_A;
+	volatile unsigned char count;
 
 
 

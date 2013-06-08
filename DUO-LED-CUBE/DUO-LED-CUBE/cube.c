@@ -412,8 +412,6 @@ void sendvoxels_rand_z (int iterations, int delay, int wait)
 void box_wireframe(int x1, int y1, int z1, int x2, int y2, int z2,int value)
 {
 	// Lines along X axis
-	
-
 	for (uint8_t ix=x1;ix<=x2;ix++)
 	{
 		setvoxel(ix,y1,z1,value);
@@ -429,7 +427,6 @@ void box_wireframe(int x1, int y1, int z1, int x2, int y2, int z2,int value)
 		setvoxel(x2,iy,z1,value);
 		setvoxel(x2,iy,z2,value);
 	}
-
 	// Lines along Z axis
 	for (uint8_t iz=z1;iz<=z2;iz++)
 	{
@@ -438,7 +435,6 @@ void box_wireframe(int x1, int y1, int z1, int x2, int y2, int z2,int value)
 		setvoxel(x2,y1,iz,value);
 		setvoxel(x2,y2,iz,value);
 	}
-
 } 
 
 
