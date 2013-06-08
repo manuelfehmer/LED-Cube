@@ -61,7 +61,37 @@
     <GenerateEepFile>True</GenerateEepFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="59116.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="59116.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cube.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cube.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="DUO-LED-CUBE.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="font.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="font.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="main.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="twi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="twi.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
