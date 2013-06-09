@@ -4,9 +4,9 @@
  * Created: 08.06.2013 14:32:29
  *  Author: Manuel
  */ 
+
 #include "main.h"
-
-
+#include "SPI.h"
 //#include "uart.h"
 #include "font.h"
 #include "59116.h"
@@ -24,17 +24,16 @@ ISR (TIMER0_COMP_vect);
 
 int main (void)
 {
-	//Muster Laden
-	for(int i=0;i<8;i++)
-		for(int j=0;j<8;j++)
-			for(int k=0;k<8;k++)
-				LED[i][j][k]=0;
 	if(CORE==Master){
 		DDRA=0xff;				//PORTA als Ausgang
+		DDRD|=(1<<2);			// PD2 als Ausgang
+		SPI_MasterInit();
 	}else{
 		DDRA=0x00;				//PORTA als Eingang
+		DDRD&=~(1<<2);			// PD2 als Eingang
+		SPI_SlaveInit();
 	}
-	TWI_init();				//TWI Bus Initialisieren
+	TWI_init();					//TWI Bus Initialisieren
 	TWI_59116_reset();
 	TWI_59116_setup();
 	Interrupt_init();
@@ -67,132 +66,50 @@ int main (void)
 				_delay_us(500);
 			}
 		}
-/*
-		effect_box_woopwoop(40,0);
-		effect_telcstairs(0,50,0xff); //naja
-		effect_stringfly2("RT-CUSTOMZ");
-		set_cube(0xff);
-		for(int h=255;h>20;h--)			//PWM Test
-			for(int i=0;i<8;i++)
-				for(int j=0;j<8;j++)
-					for(int k=0;k<8;k++)
-					{	cli();
-						LED[i][j][k]=h;
-						_delay_us(10);	
-						sei();
-					}
-		for(int h=20;h<255;h++)
-			for(int i=0;i<8;i++)
-				for(int j=0;j<8;j++)
-					for(int k=0;k<8;k++)
-					{	cli();
-						LED[i][j][k]=h;
-						_delay_us(10);	
-						sei();
-					}
-		clear_cube(0x00);
-		//effect_rain(300);
-		effect_telcstairs(0,50,0xff);
-		//effect_wormsqueeze (2, AXIS_Z, -1, 100, 50);
-		sendvoxels_rand_z(100,15,20);
-		
-		
-		effect_box_woopwoop(40,0);
-		for (uint8_t ii=0;ii<8;ii++)
-			effect_box_shrink_grow (ii%4, ii & 4, 20);
-		
-		setplane(AXIS_X,0);
-		effect_planboing(AXIS_X,20);
-		effect_planboing(AXIS_Y,20);
-		effect_planboing(AXIS_Z,20);
-		_delay_ms(50);
-		for(int i=0;i<7;i++)
-		{	
-			shift(AXIS_X,1);
-			_delay_ms(50);
-		}
-		for(int i=0;i<7;i++)
-		{	
-			shift(AXIS_X,-1);
-			_delay_ms(50);
-		}
-		
-
-
-		set_cube(0);
-		for(int i=0;i<8;i++)			//	Pixel durchtesten
-			for(int j=0;j<64;j++)
-			{	LED[i][j/8][j%8]=0xff;
-				_delay_us(500);
-			}
-*/
-
 	}
-
-
 return 0;
 }
 
-ISR(TIMER0_COMP_vect)				//Timer 0 Compare Interrupt startet hier
+ISR (INT0_vect)
 {
-	TCCR0&=~3;						//Timer aus
-	TCNT0=0;						//Zählwert wieder auf 0
-	OCR0=100;
-	if(CORE == Master){						//Interrupt Comparewert wieder laden
+	if(CORE == Slave){
 		I2C_Leds_ein(Ebene_ein%8);		//Säulentreiber einschalten für nächste Ebene
 		Ebene_ein++;
-	}else{					//nächste Ebene bearbeiten
-		input_A ^= PINA;
-		count = 0;
-		switch(input_A){
-			case 0x01: 
-				count=0;
-				break;
-			case 0x02: 
-				count=1;
-				break;
-			case 0x04: 
-				count=2;
-				break;
-			case 0x08: 
-				count=3;
-				break;
-			case 0x10: 
-				count=4;
-				break;
-			case 0x20: 
-				count=5;
-				break;
-			case 0x40: 
-				count=6;
-				break;
-			case 0x80: 
-				count=7;
-				break;
-			defauld: 
-				count=0;
-				break;
-		}
-		//while(input_A!=1){
-			
-		//	input_A=(input_A>>1);
-		//	count++;
-		//}
-		I2C_Leds_ein(count);		//Säulentreiber einschalten für nächste Ebene
+	}	
+}
+
+ISR(TIMER0_COMP_vect)					//Timer 0 Compare Interrupt startet hier
+{
+	TCCR0&=~3;							//Timer aus
+	TCNT0=0;							//Zählwert wieder auf 0
+	OCR0=100;
+	if(CORE == Master){					//Interrupt Comparewert wieder laden
+		//SPI_MasterTransmit(Ebene_ein%8);
+		PORTD |=(1<<2);
+		I2C_Leds_ein(Ebene_ein%8);		//Säulentreiber einschalten für nächste Ebene
+		Ebene_ein++;
+		PORTD&=~(1<<2);
 	}			
-	TCCR0|=3;						//Timer ein
+	TCCR0|=3;							//Timer ein
 }
 
 void Interrupt_init(void)
 { 
 //############################################
+// Extern Interrupt
+	if(CORE == Slave){
+		GICR |= (1<<INT0);				//INT0 enable
+		MCUCR=(1<<ISC00);				//INT0 rising edge
+		MCUCR=(1<<ISC01);				
+	}	
+//############################################
 //TIMER 0 einstellungen alle 5ms Interrupt
 //############################################
-	TIMSK=(1<<OCIE0);				//Erlaubt Compare Interupt A
-	TCCR0=(1<<FOC0);				//Schaltet den Compare Modus ein 
-	TCCR0|=3;						//Prescaler 64
-	OCR0=800; 						//Comparewert-Initialisierung auf ca. 5 ms bis zum ersten Interupt
-	TCNT0=0;						//Timerwert auf 0 initialisieren
+	TIMSK=(1<<OCIE0);					//Erlaubt Compare Interupt A
+	TCCR0=(1<<FOC0);					//Schaltet den Compare Modus ein 
+	TCCR0|=3;							//Prescaler 64
+	OCR0=800; 							//Comparewert-Initialisierung auf ca. 5 ms bis zum ersten Interupt
+	TCNT0=0;							//Timerwert auf 0 initialisieren
 //ENDE TIMER0
 }
 

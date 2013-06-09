@@ -88,6 +88,9 @@
     <Compile Include="main.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="SPI.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="twi.c">
       <SubType>compile</SubType>
     </Compile>
