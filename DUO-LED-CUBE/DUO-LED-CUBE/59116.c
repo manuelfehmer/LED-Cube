@@ -37,51 +37,69 @@ void I2C_Leds_ein(unsigned char Ebene)
 {
 	if(CORE == Master)
 	{
-	
+		SPI_MasterTransmit(Ebene);
+		
 		twi_start_wait(PWMDRIVER1+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=0; x<=15;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			twi_write(LED[0][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER2+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=16; x<=31;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			twi_write(LED[0][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER3+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=32; x<=47;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			twi_write(LED[Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER4+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=48; x<=63;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			twi_write(LED[Ebene][x/8][x%8]);
 		}
 		PORTA=0xff;
 		twi_stop();
 		PORTA&= ~(1<<Ebene);
 	}else{
+		Ebene=SPI_SlaveReceive();
 		
 		twi_start_wait(PWMDRIVER1+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=0; x<=15;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			LED[1][Ebene][x/8][x%8]=SPI_SlaveReceive();
+			twi_write(LED[1][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER2+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=16; x<=31;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			LED[1][Ebene][x/8][x%8]=SPI_SlaveReceive();
+			twi_write(LED[1][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER3+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=32; x<=47;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			LED[1][Ebene][x/8][x%8]=SPI_SlaveReceive();
+			twi_write(LED[1][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER4+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=48; x<=63;x++)				
-		{	twi_write(LED[Ebene][x/8][x%8]);
+		{	
+			LED[1][Ebene][x/8][x%8]=SPI_SlaveReceive();
+			twi_write(LED[1][Ebene][x/8][x%8]);
 		}
 		twi_stop();
 		

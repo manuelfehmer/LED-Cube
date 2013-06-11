@@ -41,7 +41,9 @@ void SPI_MasterInit()
 	/* Set MOSI and SCK output, all others input */
 	DDRB = (1<<DD_MOSI)|(1<<DD_SCK);
 	/* Enable SPI, Master, set clock rate fck/16 */
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+	//SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+	/* Enable SPI, Master, set clock rate fck/4 */
+	SPCR = (1<<SPE)|(1<<MSTR);
 }
 
 void SPI_SlaveInit()
