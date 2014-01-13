@@ -13,7 +13,7 @@
 	
 	#define Master 0
 	#define Slave 1
-	#define CORE 0				// define as Master use 0 otherwise Slave use 1
+	
 	
 
 

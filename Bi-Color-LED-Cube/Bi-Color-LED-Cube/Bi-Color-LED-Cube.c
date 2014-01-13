@@ -27,8 +27,9 @@
 #include "cube.h"
 
 // Select Core as Master or Slave
-//#define MASTER
-#define SLAVE
+//CORE 0 as MASTER
+//CORE 1 as SLAVE
+#define CORE 1
 
 void Interrupt_MASTER_init(void);
 void Interrupt_SLAVE_init(void);
@@ -40,27 +41,27 @@ int main(void)
 	TWI_59116_reset();
 	TWI_59116_setup();
 	
-	#ifdef MASTER
+	#if CORE 0
 		DDRA=0xff;				//PORTA als Ausgang
 		DDRD|=(1<<2);			// PD2 als Ausgang
 		Interrupt_Master_Init();
-		sei();
 		SPI_MasterInit();
 		Ebene_ein=0;
+		sei();
 	#endif
 	
-	#ifdef SLAVE
+	#if CORE 1
 		DDRA=0x00;				//PORTA als Eingang
 		DDRD&=~(1<<2);			// PD2 als Eingang
 		Interrupt_Slave_Init();
-		sei();
 		SPI_SlaveInit();
 		Ebene_ein=0;
+		sei();
     #endif
 	
 	while(1)
     {
-        #ifdef MASTER
+        #if CORE 1
 			for (uint8_t ii=0;ii<8;ii++)
 				effect_box_shrink_grow (0,ii%4, ii & 4, 20);
 			for (uint8_t ii=0;ii<8;ii++)
@@ -79,7 +80,7 @@ void Interrupt_Master_Init(void)
 	TCNT0=0;							//Timerwert auf 0 initialisieren
 }
 
-#ifdef MASTER
+#if CORE 0
 ISR(TIMER0_COMP_vect)					//Timer 0 Compare Interrupt startet hier
 {
 	TCCR0&=~3;							//Timer aus
@@ -102,7 +103,7 @@ void Interrupt_Slave_Init(void)
 	MCUCR = (1<<ISC01);
 }
 
-#ifdef SLAVE
+#if CORE 1
 ISR (INT0_vect)
 {
 	Ebene_ein = SPI_SlaveReceive();
