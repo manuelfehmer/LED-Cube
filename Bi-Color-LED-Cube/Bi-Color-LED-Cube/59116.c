@@ -35,7 +35,7 @@ void TWI_59116_reset(void)
 
 void I2C_Leds_ein(unsigned char Ebene)
 {
-	#if CORE 0
+	#if MASTER
 		PORTD|=(1<<2);											//activate INT0
 		SPI_MasterTransmit(Ebene);
 		twi_write(0x82);					
@@ -71,7 +71,7 @@ void I2C_Leds_ein(unsigned char Ebene)
 		twi_stop();
 		PORTA&=~(1<<Ebene);
 	#endif
-	#if CORE 1
+	#if SLAVE
 		twi_start_wait(PWMDRIVER1+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=0; x<=15;x++)				

@@ -10,11 +10,6 @@
 	#include <avr/interrupt.h>
 	#include <avr/wdt.h>     		/*Bibliothek für Watchdog-Funktionen*/
 	#include <util/twi.h>   		//TW-Defines
-	
-	#define Master 0
-	#define Slave 1
-	
-	
 
 
 #endif
