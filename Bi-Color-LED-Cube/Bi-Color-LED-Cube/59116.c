@@ -1,5 +1,6 @@
 #include "59116.h"
-
+#define MASTER	1
+#define SLAVE	0
 void TWI_59116_setup(void)
 {
 	for(int i=0;i<4;i++)
@@ -36,40 +37,38 @@ void TWI_59116_reset(void)
 void I2C_Leds_ein(unsigned char Ebene)
 {
 	#if MASTER
-		PORTD|=(1<<2);											//activate INT0
-		SPI_MasterTransmit(Ebene);
+		
+		//SPI_MasterTransmit(Ebene);
+		twi_start_wait(PWMDRIVER1+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=0; x<=15;x++)				
-		twi_start_wait(PWMDRIVER1+I2C_WRITE);
 		{	
-			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			//SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
 			twi_write(LED[0][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER2+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=16; x<=31;x++)				
 		{	
-			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			//SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
 			twi_write(LED[0][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER3+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=32; x<=47;x++)				
 		{	
-			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			//SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
 			twi_write(LED[0][Ebene][x/8][x%8]);
 		}
 		twi_start(PWMDRIVER4+I2C_WRITE);
 		twi_write(0x82);					
 		for(int x=48; x<=63;x++)				
 		{	
-			SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
+			//SPI_MasterTransmit(LED[1][Ebene][x/8][x%8]);
 			twi_write(LED[0][Ebene][x/8][x%8]);
 		}
-		PORTA=0xff;
-		PORTD&=~(1<<2);											//deactivate INT0
 		twi_stop();
-		PORTA&=~(1<<Ebene);
+		
 	#endif
 	#if SLAVE
 		twi_start_wait(PWMDRIVER1+I2C_WRITE);

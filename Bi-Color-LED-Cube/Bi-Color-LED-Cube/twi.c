@@ -6,8 +6,8 @@
 void TWI_init()
 {
 	//Adressports setzen (Chip-Selekt)
-    DDRC  |= 0b00011111; //PC2..PC4 auf Ausgang=1, Rest auf Eingang 
-    PORTC |= 0b00011100; //PC2..PC4 auf HIGH
+    DDRC  |= 0b00000011; //PC2..PC4 auf Ausgang=1, Rest auf Eingang 
+    //PORTC |= 0b00011100; //PC2..PC4 auf HIGH
 
  	TWSR = 0;                         // kein Prescaler also 1
   	TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  // soll größer 10 bei 500kHz = 12

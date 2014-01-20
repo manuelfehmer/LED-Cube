@@ -7,7 +7,7 @@
 	
 	#define I2C_READ    1
 	#define I2C_WRITE   0
-	#define SCL_CLOCK  760000L			//800kHz I2C Frequenz	
+	#define SCL_CLOCK  700000L			//800kHz I2C Frequenz	
 	
 	void TWI_init();
 	unsigned char twi_start(unsigned char address);	//Reserviert den Bus und spricht die Slave Adresse an

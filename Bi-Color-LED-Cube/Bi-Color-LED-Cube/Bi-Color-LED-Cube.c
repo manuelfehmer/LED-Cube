@@ -32,9 +32,6 @@
 #define MASTER	1
 #define SLAVE	0
 
-void Interrupt_MASTER_init(void);
-void Interrupt_SLAVE_init(void);
-//ISR (TIMER0_COMP_vect);
 
 int main(void)
 {
@@ -62,40 +59,45 @@ int main(void)
 	
 	while(1)
     {
-        #if SLAVE
-			for (uint8_t ii=0;ii<8;ii++)
-				effect_box_shrink_grow (0,ii%4, ii & 4, 20);
-			for (uint8_t ii=0;ii<8;ii++)
-				effect_box_shrink_grow (1,ii%4, ii & 4, 20);
+        #if MASTER
+			effect_rain(0,10);
 		
 		#endif
     }
 }
+
+#if MASTER
 void Interrupt_Master_Init(void)
 {
 	// Timer-Interrupt Timer0
 	TIMSK=(1<<OCIE0);					//Erlaubt Compare Interupt A
 	TCCR0=(1<<FOC0);					//Schaltet den Compare Modus ein 
 	TCCR0|=3;							//Prescaler 64
-	OCR0=1000; 							//Comparewert-Initialisierung auf ca. 5 ms bis zum ersten Interupt
+	OCR0=400; 							//Comparewert-Initialisierung auf ca. 5 ms bis zum ersten Interupt
 	TCNT0=0;							//Timerwert auf 0 initialisieren
 }
 
-#if MASTER
+
 ISR(TIMER0_COMP_vect)					//Timer 0 Compare Interrupt startet hier
 {
 	TCCR0&=~3;							//Timer aus
 	TCNT0=0;							//Zählwert wieder auf 0
-	OCR0=1000;
+	OCR0=400;
 				//Interrupt Comparewert wieder laden
 		
 	//SPI_MasterTransmit(Ebene_ein%8);
+	PORTD|=(1<<2);	//activate INT0
+	
 	I2C_Leds_ein(Ebene_ein%8);		//Säulentreiber einschalten für nächste Ebene
+	PORTA=0xff;
+	PORTA&=~(1<<Ebene_ein);
 	Ebene_ein++;
 	TCCR0|=3;							//Timer ein
+	PORTD&=~(1<<2);											//deactivate INT0
 }
 #endif
 
+#if SLAVE
 void Interrupt_Slave_Init(void)
 { 
 	// Externer Interrupt INT0
@@ -104,7 +106,6 @@ void Interrupt_Slave_Init(void)
 	MCUCR = (1<<ISC01);
 }
 
-#if SLAVE
 ISR (INT0_vect)
 {
 	Ebene_ein = SPI_SlaveReceive();
